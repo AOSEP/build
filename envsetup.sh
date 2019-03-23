@@ -28,7 +28,7 @@ export HMM_DESCRIPTIVE=(
 "repopick: Utility to fetch changes from Gerrit."
 "installboot: Installs a boot.img to the connected device."
 "installrecovery: Installs a recovery.img to the connected device."
-"clog:   Generate the changelog, vendor/validus/tools/Changelog_Validus.txt"
+"clog:   Generate the changelog, vendor/aosep/tools/Changelog_aosep.txt"
 )
 
 function hmm() {
@@ -76,13 +76,13 @@ function check_product()
         echo "Couldn't locate the top of the tree.  Try setting TOP." >&2
         return
     fi
-    if (echo -n $1 | grep -q -e "^validus_") ; then
-        VALIDUS_BUILD=$(echo -n $1 | sed -e 's/^validus_//g')
-        export BUILD_NUMBER=$( (date +%s%N ; echo $VALIDUS_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
+    if (echo -n $1 | grep -q -e "^aosep_") ; then
+        aosep_BUILD=$(echo -n $1 | sed -e 's/^aosep_//g')
+        export BUILD_NUMBER=$( (date +%s%N ; echo $aosep_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
     else
-        VALIDUS_BUILD=
+        aosep_BUILD=
     fi
-    export VALIDUS_BUILD
+    export aosep_BUILD
 
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
@@ -513,14 +513,8 @@ function print_lunch_menu()
     echo ""
     tput setaf 1;
     tput bold;
-    echo "  ▄▀▀▄ ▄▀▀▄  ▄▀▀█▄   ▄▀▀▀▀▄     ▄▀▀█▀▄    ▄▀▀█▄▄   ▄▀▀▄ ▄▀▀▄  ▄▀▀▀▀▄ "
-    echo " █   █    █ ▐ ▄▀ ▀▄ █    █     █   █  █  █ ▄▀   █ █   █    █ █ █   ▐ "
-    echo " ▐  █    █    █▄▄▄█ ▐    █     ▐   █  ▐  ▐ █    █ ▐  █    █     ▀▄   "
-    echo "    █   ▄▀   ▄▀   █     █          █       █    █   █    █   ▀▄   █  "
-    echo "     ▀▄▀    █   ▄▀    ▄▀▄▄▄▄▄▄▀ ▄▀▀▀▀▀▄   ▄▀▄▄▄▄▀    ▀▄▄▄▄▀   █▀▀▀   "
-    echo "            ▐   ▐     █        █       █ █     ▐              ▐      "
-    echo "                      ▐        ▐       ▐ ▐                           "
-    echo ""
+    echo "  aosep "
+    
     tput sgr0;
     echo ""
     echo "                      Welcome to the device menu                      "
@@ -538,7 +532,7 @@ function print_lunch_menu()
         i=$(($i+1))
     done | column
 
-    if [ "z${VALIDUS_DEVICES_ONLY}" != "z" ]; then
+    if [ "z${aosep_DEVICES_ONLY}" != "z" ]; then
        echo "... and don't forget the bacon!"
     fi
 
@@ -549,7 +543,7 @@ function brunch()
 {
     breakfast $*
     if [ $? -eq 0 ]; then
-        mka validus
+        mka aosep
     else
         echo "No such item in brunch menu. Try 'breakfast'"
         return 1
@@ -567,10 +561,10 @@ function breakfast()
 {
     target=$1
     local variant=$2
-    VALIDUS_DEVICES_ONLY="true"
+    aosep_DEVICES_ONLY="true"
     unset LUNCH_MENU_CHOICES
     add_lunch_combo full-eng
-    for f in `/bin/ls vendor/validus/vendorsetup.sh 2> /dev/null`
+    for f in `/bin/ls vendor/aosep/vendorsetup.sh 2> /dev/null`
         do
             echo "including $f"
             . $f
@@ -590,7 +584,7 @@ function breakfast()
             if [ -z "$variant" ]; then
                 variant="userdebug"
             fi
-            lunch validus_$target-$variant
+            lunch aosep_$target-$variant
         fi
     fi
     return $?
@@ -1690,7 +1684,7 @@ function installboot()
     sleep 1
     adb wait-for-online shell mount /system 2>&1 > /dev/null
     adb wait-for-online remount
-    if (adb shell getprop ro.validus.device | grep -q "$VALIDUS_BUILD");
+    if (adb shell getprop ro.validus.device | grep -q "$aosep_BUILD");
     then
         adb push $OUT/boot.img /cache/
         for i in $OUT/system/lib/modules/*;
@@ -1701,7 +1695,7 @@ function installboot()
         adb shell chmod 644 /system/lib/modules/*
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $VALIDUS_BUILD, run away!"
+        echo "The connected device does not appear to be $aosep_BUILD, run away!"
     fi
 }
 
@@ -2028,26 +2022,26 @@ addcompletions
 
 export ANDROID_BUILD_TOP=$(gettop)
 
-. $ANDROID_BUILD_TOP/vendor/validus/build/envsetup.sh
+. $ANDROID_BUILD_TOP/vendor/aosep/build/envsetup.sh
 
 function clog()
 {
     txtrst=$(tput sgr0)             #  Reset
     bldgrn=${txtbld}$(tput setaf 2) #  green
 
-    clog_cmd=vendor/validus/tools/changelog_validus
+    clog_cmd=vendor/aosep/tools/changelog_aosep
     echo ""
     echo ${bldgrn}"Executing $clog_cmd"${txtrst}
 
-    export Changelog=Changelog_Validus.txt
+    export Changelog=Changelog_aosep.txt
 
     eval "$clog_cmd"
     sed -i 's/project/   */g' $Changelog
 
-    cp $Changelog vendor/validus/
+    cp $Changelog vendor/aosep/
     rm $Changelog
 
-    echo ${bldgrn}"Changelog generated at vendor/validus/$Changelog"${txtrst}
+    echo ${bldgrn}"Changelog generated at vendor/aosep/$Changelog"${txtrst}
 
     return;
 }
