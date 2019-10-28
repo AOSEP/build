@@ -55,7 +55,7 @@ PRODUCT_PACKAGES += \
     SharedStorageBackup \
     SimAppDialog \
     StorageManager \
-    SubstratumHelperService \
+    #SubstratumHelperService \
     substratum-sysconfig.xml \
     Telecom \
     TeleService \
